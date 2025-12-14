@@ -7,9 +7,17 @@ proc1, proc2 = None, None
 
 channel_name = "testtesttest"
 
-answer = f"[ANSWER] marigold: {merkle_root_for_file("testcase/marigold")}"
 
 try:
+    with open("testcase/_marigold", "rb") as f:
+        marigold_content = f.read()
+
+    with open("testcase/marigold", "wb") as f:
+        for _ in range(1024 * 1024 // len(marigold_content)):
+            f.write(marigold_content)
+
+    answer = f"[ANSWER] marigold: {merkle_root_for_file("testcase/marigold")}"
+
     proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", channel_name, "3"], "merkle_subscriber")
 
     if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber"):
