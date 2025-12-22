@@ -255,6 +255,11 @@ for batch_path in "${PART2_BATCHES[@]}"; do
 
         echo -e "${LWHITE}---------------------- Script output -----------------------${NC}\n"
 
+        if [[ -f "$testcase_path/IGNORE" ]]; then
+            echo -e "${LCYAN}[INFO]${NC} Testcase $batch_num-$testcase_num is ignored."
+            continue
+        fi
+
         cp -r "$WTDIR" "$WDIR"
         cp -r "$testcase_path" "$WDIR/testcase"
         mv "$WDIR/testcase/$TENTRY" "$WDIR/$TENTRY" > /dev/null 2>&1
