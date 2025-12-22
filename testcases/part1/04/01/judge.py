@@ -57,17 +57,20 @@ try:
             proc1.kill()
             proc2.kill()
             proc3.kill()
+            pr_error("Subscriber received incorrect content.")
             sys.exit(JUDGE_WA)
     elif line1 == f"{name2}:{hash2}":
         if line2 != f"{name1}:{hash1}":
             proc1.kill()
             proc2.kill()
             proc3.kill()
+            pr_error("Subscriber received incorrect content.")
             sys.exit(JUDGE_WA)
     else:
         proc1.kill()
         proc2.kill()
         proc3.kill()
+        pr_error("Subscriber received incorrect content.")
         sys.exit(JUDGE_WA)
 
 
@@ -102,8 +105,8 @@ except Exception as e:
     if proc2 is not None:
         proc2.kill()
     if proc3 is not None:
-        proc2.kill()
-    pr_error(f"An unexpected error occurred during testing. ({e})")
+        proc3.kill()
+    pr_fatal(f"An unexpected error occurred during testing. ({e})")
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")

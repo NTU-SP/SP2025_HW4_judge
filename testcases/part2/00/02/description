@@ -1,0 +1,7 @@
+Check the required workflow
+
+If you failed this testcase, please note that the specification
+requires that for each `process_block` call, a task should be
+enqueued and then processed by the `worker` thread immediately.
+Delaying this process until all blocks are present violates the
+workflow requirements.

@@ -17,9 +17,11 @@ def pr_info(msg: str) -> None:
 def pr_error(msg: str) -> None:
     if LOG_ERROR:
         print(f"\033[1;31m[ERR]\033[0m {msg}")
+        print(f"\033[1;31m[ERR]\033[0m {msg}", file= sys.stderr)
 
 def pr_fatal(msg: str) -> None:
     print(f"\033[1;35m[FATAL]\033[0m {msg}")
+    print(f"\033[1;35m[FATAL]\033[0m {msg}", file= sys.stderr)
 
 def run_command(cmd: List[str], name: str = "") -> subprocess.Popen:
     try:
@@ -46,6 +48,11 @@ def check_process(proc: subprocess.Popen, name: str = "") -> bool:
         return False
     return True
 
+def assert_alive(proc: subprocess.Popen, name: str = ""):
+    if not check_process(proc, name):
+        pr_fatal(f"'{name}' should keep alive. ({proc.returncode})")
+        sys.exit(JUDGE_FATAL)
+
 def wait_for_output(proc: subprocess.Popen, sync_str: str, timeout: int, name: str = "") -> bool:
     start_time = time.time()
     while time.time() - start_time < timeout:
@@ -56,6 +63,9 @@ def wait_for_output(proc: subprocess.Popen, sync_str: str, timeout: int, name: s
                 return True
         except BlockingIOError:
             pass
+        
+        assert_alive(proc, name)
+
         time.sleep(0.01)
 
     pr_error(f"'{name}' timed out, waiting for sync str '{sync_str}'.")
@@ -70,6 +80,9 @@ def wait_for_line(proc: subprocess.Popen, timeout: int, name: str = "") -> str:
                 return line.strip()
         except BlockingIOError:
             pass
+
+        assert_alive(proc, name)
+
         time.sleep(0.01)
 
     pr_error(f"'{name}' timed out, waiting for a line.")

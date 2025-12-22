@@ -62,9 +62,9 @@ try:
                 length != expected_length or
                 p1 != 1 or p2 != 1
             ):
-                pr_error(f"Receive an unexpected line '{line}'")
                 proc1.kill()
                 proc2.kill()
+                pr_error(f"Subscriber received an unexpected line. ('{line}')")
                 sys.exit(JUDGE_WA)
 
             recv_msgs.append(offset)
@@ -74,6 +74,7 @@ try:
             if recv_msgs[j - 1] + expected_length != recv_msgs[j]:
                 proc1.kill()
                 proc2.kill()
+                pr_error("Subscriber received out-of-order or missing messages.")
                 sys.exit(JUDGE_WA)
         
         pr_info(f"OK! Successfully exchange {nr_msg} messages.")
@@ -95,7 +96,7 @@ except Exception as e:
         proc1.kill()
     if proc2 is not None:
         proc2.kill()
-    pr_error(f"An unexpected error occurred during testing. ({e})")
+    pr_fatal(f"An unexpected error occurred during testing. ({e})")
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")

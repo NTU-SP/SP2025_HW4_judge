@@ -68,6 +68,13 @@ if [[ $UC -eq 1 ]]; then
     fi
 fi
 
+ulimit -n 2048 > /dev/null 2>&1
+if [[ $? -ne 0 ]]; then
+    hlimit="$(ulimit -Hn)"
+    echo -e "\n${LYELLOW}[WAR]${NC} Failed to set \`ulimit -n 2048\`."
+    echo -e "${LYELLOW}[WAR]${NC} The actual judge would use a higher limit, which could cause different results."
+fi
+
 cd "$(dirname "$0")"
 
 RDIR="$(pwd)"
@@ -152,13 +159,18 @@ for batch_path in "${PART1_BATCHES[@]}"; do
 
         echo -e "${LWHITE}---------------------- Script output -----------------------${NC}\n"
 
+        if [[ -f "$testcase_path/IGNORE" ]]; then
+            echo -e "${LCYAN}[INFO]${NC} Testcase $batch_num-$testcase_num is ignored."
+            continue
+        fi
+
         cp -r "$WTDIR" "$WDIR"
         cp -r "$testcase_path" "$WDIR/testcase"
         mv "$WDIR/testcase/$TENTRY" "$WDIR/$TENTRY" > /dev/null 2>&1
         cp -r "$P1DIR" "$WDIR/src"
 
-        # run "make P1=src P2=testcase/src > /dev/null 2>&1"
-        run "make P1=src P2=testcase/src"
+        run "make P1=src P2=testcase/src > /dev/null 2>&1"
+        # run "make P1=src P2=testcase/src"
         if [[ $? -ne 0 ]]; then
             echo -e "${LRED}[FAIL]${NC} Compilation error."
             batch_failed=1
@@ -170,19 +182,15 @@ for batch_path in "${PART1_BATCHES[@]}"; do
         if [[ ! -f "$WDIR/$TENTRY" ]]; then
             echo -e "${LCYAN}[INFO]${NC} '$TENTRY' not found in testcase $batch_num-$testcase_num."
         else
-            # run "python3 $TENTRY 2>$TLOG"
-            run "python3 $TENTRY"
+            run "python3 $TENTRY 2>$TLOG"
         fi
 
         rc="$?"
         if [[ $rc -ne 0 ]]; then
             echo -e "${LRED}[FAIL]${NC} Testcase $batch_num-$testcase_num failed."
             if [[ $rc -eq 2 ]]; then
-                mv "$WDIR/$TLOG" "$LOGDIR/$batch_num-$testcase_num-error.log"
-                echo -e "${LRED}[FAIL]${NC} Your program raised an error. Please check '$LOGDIR/$batch_num-$testcase_num-error.log'."
-            elif [[ $rc -eq 3 ]]; then
-                mv "$WDIR/$TLOG" "$LOGDIR/$batch_num-$testcase_num-error.log"
-                echo -e "${LPURPLE}[FATAL]${NC} Unexpected error occured in '$TENTRY'. Please check '$LOGDIR/$batch_num-$testcase_num-error.log'."
+                mv "$WDIR/$TLOG" "$LOGDIR/p1-$batch_num-$testcase_num-error.log"
+                echo -e "${LPURPLE}[FATAL]${NC} Unexpected error occured in '$TENTRY'. Please check '$LOGDIR/p1-$batch_num-$testcase_num-error.log'."
             fi
             batch_failed=1
             failed_tests+=(${testcase_num})
@@ -210,7 +218,7 @@ for batch_path in "${PART1_BATCHES[@]}"; do
     # if [[ $batch_failed -ne 0 ]]; then break; fi
 done
 
-# P1DIR="../workdir/src/part1"
+# P1DIR="[CORRECT P1 IMPLEMENTATION]"
 
 echo -e "\n${LGREEN}=================== Testcases for part2 ====================${NC}"
 
@@ -253,9 +261,10 @@ for batch_path in "${PART2_BATCHES[@]}"; do
         cp -r "$P1DIR" "$WDIR/part1"
         cp -r "$P2DIR" "$WDIR/part2"
         [[ -d "$WDIR/testcase/src" ]] && cp -i "$WDIR/testcase/src"/* "$WDIR/part2"
+        [[ -f "$WDIR/testcase/sha256.patch" ]] && patch "$WDIR/include/hw4/sha256.h" < "$WDIR/testcase/sha256.patch" > /dev/null 2>&1
 
-        # run "make P1=part1 P2=part2 > /dev/null 2>&1"
-        run "make P1=part1 P2=part2"
+        run "make P1=part1 P2=part2 > /dev/null 2>&1"
+        # run "make P1=part1 P2=part2"
         if [[ $? -ne 0 ]]; then
             echo -e "${LRED}[FAIL]${NC} Compilation error."
             batch_failed=1
@@ -274,11 +283,8 @@ for batch_path in "${PART2_BATCHES[@]}"; do
         if [[ $rc -ne 0 ]]; then
             echo -e "${LRED}[FAIL]${NC} Testcase $batch_num-$testcase_num failed."
             if [[ $rc -eq 2 ]]; then
-                mv "$WDIR/$TLOG" "$LOGDIR/$batch_num-$testcase_num-error.log"
-                echo -e "${LRED}[FAIL]${NC} Your program raised an error. Please check '$LOGDIR/$batch_num-$testcase_num-error.log'."
-            elif [[ $rc -eq 3 ]]; then
-                mv "$WDIR/$TLOG" "$LOGDIR/$batch_num-$testcase_num-error.log"
-                echo -e "${LPURPLE}[FATAL]${NC} Unexpected error occured in '$TENTRY'. Please check '$LOGDIR/$batch_num-$testcase_num-error.log'."
+                mv "$WDIR/$TLOG" "$LOGDIR/p2-$batch_num-$testcase_num-error.log"
+                echo -e "${LPURPLE}[FATAL]${NC} Unexpected error occured in '$TENTRY'. Please check '$LOGDIR/p2-$batch_num-$testcase_num-error.log'."
             fi
             batch_failed=1
             failed_tests+=(${testcase_num})

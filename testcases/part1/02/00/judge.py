@@ -44,7 +44,9 @@ try:
         ):
             proc1.kill()
             proc2.kill()
+            pr_error("Subscriber received incorrect message content.")
             sys.exit(JUDGE_WA)
+
         recv_msgs.append(offset)
 
     if not check_shm(proc1, "subscriber"):
@@ -57,6 +59,7 @@ try:
         if recv_msgs[i - 1] + expected_length != recv_msgs[i]:
             proc1.kill()
             proc2.kill()
+            pr_error("Subscriber received out-of-order or missing messages.")
             sys.exit(JUDGE_WA)
 
     pr_info(f"OK! Successfully exchange {nr_msgs} messages.")
@@ -71,7 +74,7 @@ except Exception as e:
         proc1.kill()
     if proc2 is not None:
         proc2.kill()
-    pr_error(f"An unexpected error occurred during testing. ({e})")
+    pr_fatal(f"An unexpected error occurred during testing. ({e})")
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")

@@ -41,7 +41,13 @@ try:
     decoded_line_proc1 = bytes(int(h, 16) for h in hex_bytes).decode()
 
     if decoded_line_proc1 == content:
-        pr_info("'subscriber1' received correct content")
+        pr_info("'subscriber1' received correct content.")
+    else:
+        proc1.kill()
+        proc2.kill()
+        proc3.kill()
+        pr_error("'subscriber1' received incorrect content.")
+        sys.exit(JUDGE_WA)
 
     line_from_proc2 = wait_for_line(proc2, MAX_TIMEOUT, "subscriber1")
     if len(line_from_proc1) == 0:
@@ -54,7 +60,13 @@ try:
     decoded_line_proc2 = bytes(int(h, 16) for h in hex_bytes).decode()
 
     if decoded_line_proc2 == content:
-        pr_info("'subscriber2' received correct content")
+        pr_info("'subscriber2' received correct content.")
+    else:
+        proc1.kill()
+        proc2.kill()
+        proc3.kill()
+        pr_error("'subscriber2' received incorrect content.")
+        sys.exit(JUDGE_WA)
 
     if not check_shm(proc1, "subscriber1"):
         proc1.kill()
@@ -87,8 +99,8 @@ except Exception as e:
     if proc2 is not None:
         proc2.kill()
     if proc3 is not None:
-        proc2.kill()
-    pr_error(f"An unexpected error occurred during testing. ({e})")
+        proc3.kill()
+    pr_fatal(f"An unexpected error occurred during testing. ({e})")
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")

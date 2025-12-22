@@ -49,7 +49,7 @@ except Exception as e:
         proc1.kill()
     if proc2 is not None:
         proc2.kill()
-    pr_error(f"An unexpected error occurred during testing. ({e})")
+    pr_fatal(f"An unexpected error occurred during testing. ({e})")
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")
