@@ -23,6 +23,9 @@ def pr_fatal(msg: str) -> None:
     print(f"\033[1;35m[FATAL]\033[0m {msg}")
     print(f"\033[1;35m[FATAL]\033[0m {msg}", file= sys.stderr)
 
+class FatalError(Exception):
+    pass
+
 def run_command(cmd: List[str], name: str = "") -> subprocess.Popen:
     try:
         proc = subprocess.Popen(
@@ -36,8 +39,7 @@ def run_command(cmd: List[str], name: str = "") -> subprocess.Popen:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     except Exception as e:
-        pr_fatal(f"Judge system error. ({e})")
-        sys.exit(JUDGE_FATAL)
+        raise FatalError(f"Judge system error. ({e})")
 
     pr_info(f"Process '{name}' started. (pid: {proc.pid})")
     return proc
@@ -50,8 +52,7 @@ def check_process(proc: subprocess.Popen, name: str = "") -> bool:
 
 def assert_normal(proc: subprocess.Popen, name: str = ""):
     if proc.poll() is not None and proc.returncode != 0:
-        pr_fatal(f"'{name}' should keep alive. ({proc.returncode})")
-        sys.exit(JUDGE_FATAL)
+        raise FatalError(f"'{name}' should keep alive. ({proc.returncode})")
 
 def wait_for_output(proc: subprocess.Popen, sync_str: str, timeout: int, name: str = "") -> bool:
     start_time = time.time()
