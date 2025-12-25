@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <sys/stat.h>
 
@@ -14,6 +15,7 @@
 
 struct file {
     char name[CHANNEL_MAX_NAME_LEN + 1];
+    int fd;
     uint64_t total_len, offset;
 };
 
@@ -62,7 +64,10 @@ send_file(void *buf, struct message_metadata *out_m, void *cookie)
 
     f->offset += out_m->len;
 
-    memset(buf, 'A', out_m->len);
+    if (read(f->fd, buf, out_m->len) != out_m->len) {
+        int serrno = errno;
+        ERROR_EXIT("read error (%s)\n", strerror(serrno));
+    }
 
     return 0;
 }
@@ -71,23 +76,32 @@ int
 main(int argc, char *argv[])
 {
     struct file f;
+    struct stat st;
 
-    if (argc != 4 || strlen(argv[1]) > CHANNEL_MAX_NAME_LEN)
-        ERROR_EXIT("Usage: %s <channel name (<= %d chars)> <file path> <file size>\n",
+    if (argc != 3 || strlen(argv[1]) > CHANNEL_MAX_NAME_LEN)
+        ERROR_EXIT("Usage: %s <channel name (<= %d chars)> <file path>\n",
                    argv[0], CHANNEL_MAX_NAME_LEN);
 
     char *file_name = basename(argv[2]);
     if (strlen(file_name) > CHANNEL_MAX_NAME_LEN)
         ERROR_EXIT("File name too long (<= %d chars)\n", CHANNEL_MAX_NAME_LEN);
 
+    if (stat(argv[2], &st) < 0)
+        ERROR_EXIT("stat '%s' error\n", argv[2]);
+
+    if (!S_ISREG(st.st_mode))
+        ERROR_EXIT("'%s' is not a regular file\n", argv[2]);
+
     strcpy(f.name, file_name);
-    f.total_len = strtoull(argv[3], NULL, 0);
+    f.total_len = st.st_size;
     f.offset = 0;
+    f.fd = open(argv[2], O_RDONLY);
+    if (f.fd < 0)
+        ERROR_EXIT("open '%s' error\n", argv[2]);
 
     publisher_node(argv[1], send_file, &f);
 
-    puts("[PUBLISHER SYNC END]");
-    fflush(stdout);
+    close(f.fd);
 
     return 0;
 }

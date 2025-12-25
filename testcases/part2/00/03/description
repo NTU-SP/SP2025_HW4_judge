@@ -1,0 +1,6 @@
+Check the required workflow
+
+This testcase verifies whether each `worker` thread operates
+independently. If you failed this testcase, please ensure that
+each worker thread is able to fetch tasks from the task queue
+and compute the Merkle tree nodes as expected.

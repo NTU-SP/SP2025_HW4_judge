@@ -21,7 +21,7 @@ recv_msg(void *msg_buf, struct message_metadata m __maybe_unused, void *c)
 
     nr_recvs++;
     if (nr_recvs == target) {
-        puts("OK");
+        puts("[SUBSCRIBER SYNC POINT]");
         fflush(stdout);
         nr_recvs = 0;
     }

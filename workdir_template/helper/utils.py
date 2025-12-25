@@ -48,8 +48,8 @@ def check_process(proc: subprocess.Popen, name: str = "") -> bool:
         return False
     return True
 
-def assert_alive(proc: subprocess.Popen, name: str = ""):
-    if not check_process(proc, name):
+def assert_normal(proc: subprocess.Popen, name: str = ""):
+    if proc.poll() is not None and proc.returncode != 0:
         pr_fatal(f"'{name}' should keep alive. ({proc.returncode})")
         sys.exit(JUDGE_FATAL)
 
@@ -64,7 +64,7 @@ def wait_for_output(proc: subprocess.Popen, sync_str: str, timeout: int, name: s
         except BlockingIOError:
             pass
         
-        assert_alive(proc, name)
+        assert_normal(proc, name)
 
         time.sleep(0.01)
 
@@ -81,7 +81,7 @@ def wait_for_line(proc: subprocess.Popen, timeout: int, name: str = "") -> str:
         except BlockingIOError:
             pass
 
-        assert_alive(proc, name)
+        assert_normal(proc, name)
 
         time.sleep(0.01)
 
@@ -174,3 +174,20 @@ def merkle_root_for_file(path: str) -> str:
         hashes = nxt_hashes
         
     return hashes[0]
+
+def check_threads(proc: subprocess.Popen, expected_nr: int, name: str = "") -> bool:
+    pid = proc.pid
+    task_dir = f"/proc/{pid}/task"
+
+    try:
+        nr_threads = len(os.listdir(task_dir))
+    except Exception as e:
+        pr_error(f"Failed to get thread number for '{name}'. ({e})")
+        return False
+
+    if nr_threads != expected_nr:
+        pr_error(f"'{name}' thread number mismatch. (expected {expected_nr}, got {nr_threads})")
+        return False
+
+    pr_info(f"'{name}' has expected '{expected_nr}' threads.")
+    return True

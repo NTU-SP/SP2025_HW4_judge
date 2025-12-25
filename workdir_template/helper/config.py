@@ -7,3 +7,6 @@ BINARY_DIR = "build"
 JUDGE_OK = 0
 JUDGE_WA = 1
 JUDGE_FATAL = 2
+
+SJOIN = "The subscriber node has joined the channel."
+PJOIN = "The publisher node has joined the channel."

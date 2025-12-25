@@ -8,7 +8,6 @@ from helper.utils import *
 proc1, proc2 = None, None
 
 random.seed(time.time())
-
 nr_msgs_1 = random.randint(70, 100)
 nr_msgs_2 = 300 - nr_msgs_1
 nr_msgs_3 = random.randint(3000, 5000)
@@ -27,13 +26,13 @@ expected_length = 522
 try:
     proc1 = run_command([f"{BINARY_DIR}/sub"], "subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
     proc2 = run_command([f"{BINARY_DIR}/pub"] + list(map(str, nr_msgs)), "publisher")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "publisher"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
@@ -55,6 +54,13 @@ try:
                         sys.exit(JUDGE_WA)
 
             outs = line.split(';')
+
+            if len(outs) != 6:
+                proc1.kill()
+                proc2.kill()
+                pr_error(f"Subscriber received an unexpected line. ('{line}')")
+                sys.exit(JUDGE_WA)
+
             name = outs[0]
             length, total_length, offset, p1, p2 = map(int, outs[1:])
             if (name != expected_names[i] or

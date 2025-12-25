@@ -1,0 +1,32 @@
+--- sha256.h	2025-12-22 19:37:15.982380949 +0800
++++ sha256.h.new	2025-12-25 11:59:22.417045484 +0800
+@@ -1,10 +1,16 @@
+ #ifndef __SHA256_H__
+ #define __SHA256_H__
+ 
++#include <stdio.h>
++
+ #include <stdlib.h>
+ #include <stdint.h>
+ #include <string.h>
+ 
++#include <unistd.h>
++
++#include <pthread.h>
++
+ /*
+  * Usage:
+  *   void sha256(void *src, uint64_t len, char out[SHA256_LEN + 1]);
+@@ -32,6 +38,12 @@
+     struct sha256_ctx ctx;
+     uint8_t tmp_out[32];
+ 
++    if (len == (SHA256_LEN << 1)) {
++        printf("TID:%lu\n", (unsigned long)pthread_self());
++        fflush(stdout);
++        pause();
++    }
++
+     __sha256_init(&ctx);
+     __sha256_update(&ctx, src, len);
+     __sha256_final(&ctx, tmp_out);

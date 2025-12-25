@@ -5,39 +5,43 @@ from helper.utils import *
 
 proc1, proc2, proc3 = None, None, None
 
-channel_name = "oO0oO0O0oO0o"
+CHANNEL_NAME = "oO0oO0O0oO0o"
+FILE_NAME = "sekaigaowaru"
+FILE_PATH = f"testcase/{FILE_NAME}"
+REV_FILE_PATH = f"testcase/{FILE_NAME[::-1]}"
+SRC_FILE_PATH = f"testcase/_{FILE_NAME}"
 
 try:
-    with open("testcase/_sekaigaowaru", "rb") as f:
+    with open(SRC_FILE_PATH, "rb") as f:
         content = f.read()
 
-    with open("testcase/sekaigaowaru", "wb") as f:
+    with open(FILE_PATH, "wb") as f:
         for _ in range(1024 * 1024 // len(content)):
             f.write(content)
 
-    with open("testcase/urawoagiakes", "wb") as f:
+    with open(REV_FILE_PATH, "wb") as f:
         for _ in range(1024 * 1024 // len(content)):
             f.write(content[::-1])
 
-    answer1 = f"[ANSWER] sekaigaowaru: {merkle_root_for_file("testcase/sekaigaowaru")}"
-    answer2 = f"[ANSWER] urawoagiakes: {merkle_root_for_file("testcase/urawoagiakes")}"
+    answer1 = f"[ANSWER] {FILE_NAME}: {merkle_root_for_file(FILE_PATH)}"
+    answer2 = f"[ANSWER] {FILE_NAME[::-1]}: {merkle_root_for_file(REV_FILE_PATH)}"
 
-    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", channel_name, "2"], "merkle_subscriber")
+    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", CHANNEL_NAME, "2"], "merkle_subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "merkle_subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "merkle_subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
-    proc2 = run_command([f"{BINARY_DIR}/pub", channel_name, "testcase/sekaigaowaru"], "pub1")
+    proc2 = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME, FILE_PATH], "publisher1")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "pub1"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher1"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
     
-    proc3 = run_command([f"{BINARY_DIR}/pub", channel_name, "testcase/urawoagiakes"], "pub2")
+    proc3 = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME, REV_FILE_PATH], "publisher2")
 
-    if not wait_for_output(proc3, "The publisher node has joined the channel.", MAX_TIMEOUT, "pub2"):
+    if not wait_for_output(proc3, PJOIN, MAX_TIMEOUT, "publisher2"):
         proc1.kill()
         proc2.kill()
         proc3.kill()

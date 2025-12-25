@@ -8,7 +8,6 @@ NR_SUBSCRIBERS = 50
 NR_PUBLISHERS = 50
 CHANNEL_NAME = "ooooo"
 
-
 subscribers = [None] * NR_SUBSCRIBERS
 publishers = [None] * NR_PUBLISHERS
 
@@ -28,20 +27,20 @@ nr_msgs = sum(nr_msgs_per_pub)
 try:
     for i in range(NR_SUBSCRIBERS):
         subscribers[i] = run_command([f"{BINARY_DIR}/sub", CHANNEL_NAME, str(nr_msgs)], f"subscriber{i}")
-        if not wait_for_output(subscribers[i], "The subscriber node has joined the channel.", MAX_TIMEOUT, f"subscriber{i}"):
+        if not wait_for_output(subscribers[i], SJOIN, MAX_TIMEOUT, f"subscriber{i}"):
             kill_all_procs()
             sys.exit(JUDGE_WA)
 
     for i in range(NR_PUBLISHERS):
         publishers[i] = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME, f"fakefile{i}", str(nr_msgs_per_pub[i] * 4096)], f"publisher{i}")
-        if not wait_for_output(publishers[i], "The publisher node has joined the channel.", MAX_TIMEOUT, f"publisher{i}"):
+        if not wait_for_output(publishers[i], PJOIN, MAX_TIMEOUT, f"publisher{i}"):
             kill_all_procs()
             sys.exit(JUDGE_WA)
     
     pr_info(f"Each subscriber should receive {nr_msgs} messages")
 
     for i in range(NR_SUBSCRIBERS):
-        if not wait_for_output(subscribers[i], "OK", MAX_TIMEOUT, f"subscriber{i}"):
+        if not wait_for_output(subscribers[i], "[SUBSCRIBER SYNC POINT]", MAX_TIMEOUT, f"subscriber{i}"):
             kill_all_procs()
             sys.exit(JUDGE_WA)
 

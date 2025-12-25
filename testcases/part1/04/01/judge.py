@@ -15,20 +15,20 @@ hash2 = sha256(content2.encode())
 try:
     proc1 = run_command([f"{BINARY_DIR}/sub"], "subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
     proc2 = run_command([f"{BINARY_DIR}/pub1"], "publisher1")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "publisher1"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher1"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
 
     proc3 = run_command([f"{BINARY_DIR}/pub2"], "publisher2")
 
-    if not wait_for_output(proc3, "The publisher node has joined the channel.", MAX_TIMEOUT, "publisher2"):
+    if not wait_for_output(proc3, PJOIN, MAX_TIMEOUT, "publisher2"):
         proc1.kill()
         proc2.kill()
         proc3.kill()

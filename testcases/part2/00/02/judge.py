@@ -5,18 +5,18 @@ from helper.utils import *
 
 proc1, proc2 = None, None
 
-channel_name = "koibitoninaritai"
+CHANNEL_NAME = "koibitoninaritai"
 
 try:
-    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", channel_name, "1"], "merkle_subscriber")
+    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", CHANNEL_NAME, "1"], "merkle_subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "merkle_subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "merkle_subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
-    proc2 = run_command([f"{BINARY_DIR}/pub", channel_name], "pub")
+    proc2 = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME], "publisher")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "pub"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)

@@ -5,40 +5,31 @@ from helper.utils import *
 
 proc1, proc2 = None, None
 
-expected_outputs = [
-    "name: kimiwarokkuwokikanai",
-    "len: 1128",
-    "total len: 2147483648",
-    "offset: 7777",
-    "hash: 2c9dbcc345220dabcb06a1ff8105655138e171fcd3f9f759120d226638076c9a",
-    "1 1"
-]
+CHANNEL_NAME = ".__________________."
+FILE_NAME = "_tsunami"
+FILE_PATH = f"testcase/{FILE_NAME}"
 
 try:
-    proc1 = run_command([f"{BINARY_DIR}/sub"], "subscriber")
+    answer = f"[ANSWER] {FILE_NAME}: {merkle_root_for_file(FILE_PATH)}"
 
-    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "subscriber"):
+    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", CHANNEL_NAME, "1"], "merkle_subscriber")
+
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "merkle_subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
-    proc2 = run_command([f"{BINARY_DIR}/pub"], "publisher")
+    proc2 = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME, FILE_PATH], "publisher")
 
     if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
-    
-    for expected_output in expected_outputs:
-        if not wait_for_output(proc1, expected_output, MAX_TIMEOUT, "subscriber"):
-            proc1.kill()
-            proc2.kill()
-            sys.exit(JUDGE_WA)
-
-    if not check_shm(proc1, "subscriber"):
+        
+    if not wait_for_output(proc1, answer, MAX_TIMEOUT, "merkle_subscriber"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
-    
+
     proc1.kill()
     proc1 = None
     proc2.kill()

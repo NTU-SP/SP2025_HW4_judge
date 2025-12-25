@@ -5,28 +5,30 @@ from helper.utils import *
 
 proc1, proc2 = None, None
 
-channel_name = "testtesttest"
-
+CHANNEL_NAME = "testtesttest"
+FILE_NAME = "marigold"
+FILE_PATH = f"testcase/{FILE_NAME}"
+SRC_FILE_PATH = f"testcase/_{FILE_NAME}"
 
 try:
-    with open("testcase/_marigold", "rb") as f:
+    with open(SRC_FILE_PATH, "rb") as f:
         content = f.read()
 
-    with open("testcase/marigold", "wb") as f:
+    with open(FILE_PATH, "wb") as f:
         for _ in range(1024 * 1024 // len(content)):
             f.write(content)
 
-    answer = f"[ANSWER] marigold: {merkle_root_for_file("testcase/marigold")}"
+    answer = f"[ANSWER] {FILE_NAME}: {merkle_root_for_file(FILE_PATH)}"
 
-    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", channel_name, "3"], "merkle_subscriber")
+    proc1 = run_command([f"{BINARY_DIR}/merkle_subscriber", CHANNEL_NAME, "3"], "merkle_subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "merkle_subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "merkle_subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
-    proc2 = run_command([f"{BINARY_DIR}/pub", channel_name, "testcase/marigold"], "pub")
+    proc2 = run_command([f"{BINARY_DIR}/pub", CHANNEL_NAME, FILE_PATH], "publisher")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "pub"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
@@ -50,4 +52,3 @@ except Exception as e:
     sys.exit(JUDGE_FATAL)
 
 pr_info("OK! You passed this test case.")
-

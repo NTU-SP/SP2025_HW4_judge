@@ -11,20 +11,20 @@ content = "だから風に吹かれていこう\nフィルムは用意したよ\
 try:
     proc1 = run_command([f"{BINARY_DIR}/sub"], "subscriber1")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber1"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "subscriber1"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
     proc2 = run_command([f"{BINARY_DIR}/sub"], "subscriber2")
 
-    if not wait_for_output(proc2, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber2"):
+    if not wait_for_output(proc2, SJOIN, MAX_TIMEOUT, "subscriber2"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
 
     proc3 = run_command([f"{BINARY_DIR}/pub"], "publisher")
 
-    if not wait_for_output(proc3, "The publisher node has joined the channel.", MAX_TIMEOUT, "publisher"):
+    if not wait_for_output(proc3, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         proc3.kill()
@@ -49,7 +49,7 @@ try:
         pr_error("'subscriber1' received incorrect content.")
         sys.exit(JUDGE_WA)
 
-    line_from_proc2 = wait_for_line(proc2, MAX_TIMEOUT, "subscriber1")
+    line_from_proc2 = wait_for_line(proc2, MAX_TIMEOUT, "subscriber2")
     if len(line_from_proc1) == 0:
         proc1.kill()
         proc2.kill()

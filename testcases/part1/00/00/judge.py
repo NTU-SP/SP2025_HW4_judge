@@ -8,13 +8,13 @@ proc1, proc2 = None, None
 try:
     proc1 = run_command([f"{BINARY_DIR}/sub"], "subscriber")
 
-    if not wait_for_output(proc1, "The subscriber node has joined the channel.", MAX_TIMEOUT, "subscriber"):
+    if not wait_for_output(proc1, SJOIN, MAX_TIMEOUT, "subscriber"):
         proc1.kill()
         sys.exit(JUDGE_WA)
 
     proc2 = run_command([f"{BINARY_DIR}/pub"], "publisher")
 
-    if not wait_for_output(proc2, "The publisher node has joined the channel.", MAX_TIMEOUT, "publisher"):
+    if not wait_for_output(proc2, PJOIN, MAX_TIMEOUT, "publisher"):
         proc1.kill()
         proc2.kill()
         sys.exit(JUDGE_WA)
