@@ -166,9 +166,9 @@ def merkle_root_for_file(path: str) -> str:
         
     while len(hashes) != 1:
         nxt_hashes = []
-        for idx in range(0, len(hashes), 2):
+        for idx in range(1, len(hashes), 2):
             nxt_hashes.append(
-                sha256((hashes[idx] + hashes[idx+1]).encode())
+                sha256((hashes[idx-1] + hashes[idx]).encode())
             )
         if len(hashes) % 2 == 1:
             nxt_hashes.append(hashes[-1])
