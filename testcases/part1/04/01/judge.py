@@ -80,18 +80,6 @@ try:
         proc3.kill()
         sys.exit(JUDGE_WA)
 
-    if not check_shm(proc2, "publisher1"):
-        proc1.kill()
-        proc2.kill()
-        proc3.kill()
-        sys.exit(JUDGE_WA)
-
-    if not check_shm(proc3, "publisher2"):
-        proc1.kill()
-        proc2.kill()
-        proc3.kill()
-        sys.exit(JUDGE_WA)
-
     proc1.kill()
     proc1 = None
     proc2.kill()

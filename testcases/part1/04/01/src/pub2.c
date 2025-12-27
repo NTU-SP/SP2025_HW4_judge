@@ -1,8 +1,6 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <unistd.h>
-
 #include <hw4/utils.h>
 
 #include "channel.h"
@@ -27,7 +25,7 @@ send_one(void *buffer, struct message_metadata *m, void *c __maybe_unused)
     static int is_sent = 0;
     char *buf = (char*)buffer;
     if (is_sent)
-        pause();
+        return -1;
 
     strcpy(buf, content);
 
